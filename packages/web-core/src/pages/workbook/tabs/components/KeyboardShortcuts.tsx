@@ -1,7 +1,5 @@
-import React from 'react';
-
 export function useKeyboardShortcuts(_config: unknown): void {
-  // Stub: no-op
+  // stub
 }
 
 interface KeyboardShortcutsHelpProps {
@@ -10,12 +8,12 @@ interface KeyboardShortcutsHelpProps {
   onClose: () => void;
 }
 
-export function KeyboardShortcutsHelp(
-  _props: KeyboardShortcutsHelpProps
-): React.ReactElement | null {
+export function KeyboardShortcutsHelp(_props: KeyboardShortcutsHelpProps) {
   return null;
 }
 
-export function getWorkbookShortcuts(): unknown[] {
+export function getWorkbookShortcuts(
+  _config?: Record<string, unknown>
+): unknown[] {
   return [];
 }
