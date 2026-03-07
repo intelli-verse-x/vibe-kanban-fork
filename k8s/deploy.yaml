@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vibe-kanban-v1
+  namespace: aicart
+  labels:
+    app: vibe-kanban-v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vibe-kanban-v1
+  template:
+    metadata:
+      labels:
+        app: vibe-kanban-v1
+    spec:
+      containers:
+        - name: server
+          image: 970547373533.dkr.ecr.us-east-1.amazonaws.com/vibe-kanban-v1:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          env:
+            - name: HOST
+              value: "0.0.0.0"
+            - name: PORT
+              value: "3000"
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "2000m"
+              memory: "2Gi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          volumeMounts:
+            - name: repos-data
+              mountPath: /repos
+            - name: app-data
+              mountPath: /home/appuser/.local/share
+      volumes:
+        - name: repos-data
+          emptyDir: {}
+        - name: app-data
+          emptyDir: {}

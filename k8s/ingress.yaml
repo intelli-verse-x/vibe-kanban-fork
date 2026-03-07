@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:970547373533:certificate/c5a0e339-3eb5-4ff7-b9d3-7eccfb055331
+    alb.ingress.kubernetes.io/load-balancer-name: vibe-kanban-lb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/subnets: subnet-081072daa41808d00, subnet-0c12ed7ffedf6610d, subnet-0effa916462e32901
+    alb.ingress.kubernetes.io/target-type: ip
+  name: vibe-kanban-v1
+  namespace: aicart
+spec:
+  ingressClassName: alb
+  rules:
+    - host: vibe-kanban.intelli-verse-x.ai
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: vibe-kanban-v1
+                port:
+                  number: 3000
