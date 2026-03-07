@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, type ReactNode } from 'react';
-import { useSearch } from '@tanstack/react-router';
+import { useCallback, useEffect, useMemo, useRef, type ReactNode } from 'react';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { Group, Layout, Panel, Separator } from 'react-resizable-panels';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -107,8 +107,21 @@ function ProjectKanbanLayout({
   const { issueId, isPanelOpen } = useCurrentKanbanRouteState();
   const isMobile = useIsMobile();
   const { getIssue } = useProjectContext();
+  const navigate = useNavigate();
   const search = useSearch({ strict: false });
   const activeTab: WorkbookTab = (search.tab as WorkbookTab) || 'board';
+  const handleTabChange = useCallback(
+    (tab: WorkbookTab) => {
+      void (navigate as (opts: Record<string, unknown>) => Promise<void>)({
+        search: {
+          ...(search as Record<string, unknown>),
+          tab: tab === 'board' ? undefined : tab,
+        },
+        replace: true,
+      });
+    },
+    [navigate, search]
+  );
   const issue = issueId ? getIssue(issueId) : undefined;
   usePageTitle(issue?.title, projectName);
   const [kanbanLeftPanelSize, setKanbanLeftPanelSize] = usePaneSize(
@@ -147,7 +160,11 @@ function ProjectKanbanLayout({
 
   return (
     <div className="flex flex-col h-full">
-      <WorkbookTabBar projectId={projectId} />
+      <WorkbookTabBar
+        projectId={projectId}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+      />
 
       <div className="flex-1 min-h-0 relative overflow-hidden">
         <AnimatePresence mode="wait">

@@ -6,7 +6,9 @@ interface QuickSearchProps {
   [key: string]: unknown;
 }
 
-export function QuickSearch(props: QuickSearchProps): React.ReactElement | null {
+export function QuickSearch(
+  props: QuickSearchProps
+): React.ReactElement | null {
   if (!props.isOpen) return null;
   return null;
 }

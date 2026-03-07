@@ -1,6 +1,5 @@
 import type { ElementType } from 'react';
 import { useCallback, useMemo, useRef, useEffect, useState } from 'react';
-import { useNavigate, useSearch } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/shared/lib/utils';
 import { useProjectRole } from '@/shared/hooks/workbook/useProjectRole';
@@ -154,13 +153,17 @@ const SECONDARY_TAB_CONFIGS: TabConfig[] = [
 
 interface WorkbookTabBarProps {
   projectId: string;
+  activeTab: WorkbookTab;
+  onTabChange: (tab: WorkbookTab) => void;
   className?: string;
 }
 
-export function WorkbookTabBar({ projectId, className }: WorkbookTabBarProps) {
-  const navigate = useNavigate();
-  const search = useSearch({ strict: false });
-  const activeTab = (search.tab as WorkbookTab) || 'board';
+export function WorkbookTabBar({
+  projectId,
+  activeTab,
+  onTabChange,
+  className,
+}: WorkbookTabBarProps) {
   const { data: role, isLoading: roleLoading } = useProjectRole(projectId);
   const [hoveredTab, setHoveredTab] = useState<WorkbookTab | null>(null);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
@@ -215,16 +218,9 @@ export function WorkbookTabBar({ projectId, className }: WorkbookTabBarProps) {
   const handleTabChange = useCallback(
     (tab: WorkbookTab) => {
       setShowMoreMenu(false);
-      navigate({
-        to: '.',
-        search: (prev: Record<string, unknown>) => ({
-          ...prev,
-          tab: tab === 'board' ? undefined : tab,
-        }),
-        replace: true,
-      });
+      onTabChange(tab);
     },
-    [navigate]
+    [onTabChange]
   );
 
   if (roleLoading) {

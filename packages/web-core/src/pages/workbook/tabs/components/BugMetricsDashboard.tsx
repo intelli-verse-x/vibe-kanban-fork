@@ -4,6 +4,8 @@ interface BugMetricsDashboardProps {
   [key: string]: unknown;
 }
 
-export function BugMetricsDashboard(_props: BugMetricsDashboardProps): React.ReactElement | null {
+export function BugMetricsDashboard(
+  _props: BugMetricsDashboardProps
+): React.ReactElement | null {
   return null;
 }

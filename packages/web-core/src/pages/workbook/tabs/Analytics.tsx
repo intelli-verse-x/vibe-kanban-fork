@@ -2,8 +2,8 @@ interface ProjectWorkbookAnalyticsProps {
   projectId: string;
 }
 
-export function ProjectWorkbookAnalytics({ projectId }: ProjectWorkbookAnalyticsProps) {
-  return (
-    <div data-project-id={projectId}>Analytics - Coming Soon</div>
-  );
+export function ProjectWorkbookAnalytics({
+  projectId,
+}: ProjectWorkbookAnalyticsProps) {
+  return <div data-project-id={projectId}>Analytics - Coming Soon</div>;
 }
