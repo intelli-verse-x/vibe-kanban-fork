@@ -700,7 +700,7 @@ export function ProjectWorkbookTasks({
         bugs={bugs}
         features={features}
         members={membersArray}
-        onSelectIssue={(issue) => setSelectedIssueId(issue.id)}
+        onSelectIssue={(issue: { id: string }) => setSelectedIssueId(issue.id)}
         isOpen={showSearch}
         onClose={() => setShowSearch(false)}
       />

@@ -772,7 +772,7 @@ export function ProjectWorkbookBugs({ projectId }: ProjectWorkbookBugsProps) {
         bugs={(bugs || []) as Bug[]}
         features={(features || []) as Feature[]}
         members={membersArray}
-        onSelectBug={(bug) => setEditingBug(bug as Bug)}
+        onSelectBug={(bug: Bug) => setEditingBug(bug)}
         isOpen={showSearch}
         onClose={() => setShowSearch(false)}
       />
