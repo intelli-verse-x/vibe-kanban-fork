@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, type ReactNode } from 'react';
+import { useSearch } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { Group, Layout, Panel, Separator } from 'react-resizable-panels';
+import { motion, AnimatePresence } from 'framer-motion';
 import { OrgProvider } from '@/shared/providers/remote/OrgProvider';
 import { useOrgContext } from '@/shared/hooks/useOrgContext';
 import { ProjectProvider } from '@/shared/providers/remote/ProjectProvider';
@@ -11,6 +13,8 @@ import { KanbanContainer } from '@/features/kanban/ui/KanbanContainer';
 import { useIsMobile } from '@/shared/hooks/useIsMobile';
 import { ProjectRightSidebarContainer } from './ProjectRightSidebarContainer';
 import { LoginRequiredPrompt } from '@/shared/dialogs/shared/LoginRequiredPrompt';
+import { WorkbookTabBar } from '@/shared/components/WorkbookTabBar';
+import { WorkbookContent } from './WorkbookContent';
 import {
   PERSIST_KEYS,
   usePaneSize,
@@ -25,6 +29,7 @@ import {
   buildKanbanIssueComposerKey,
   closeKanbanIssueComposer,
 } from '@/shared/stores/useKanbanIssueComposerStore';
+import type { WorkbookTab } from '@/project-routes/project-search';
 /**
  * Component that registers project mutations with ActionsContext.
  * Must be rendered inside both ActionsProvider and ProjectProvider.
@@ -92,10 +97,18 @@ function ProjectMutationsRegistration({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-function ProjectKanbanLayout({ projectName }: { projectName: string }) {
+function ProjectKanbanLayout({
+  projectName,
+  projectId,
+}: {
+  projectName: string;
+  projectId: string;
+}) {
   const { issueId, isPanelOpen } = useCurrentKanbanRouteState();
   const isMobile = useIsMobile();
   const { getIssue } = useProjectContext();
+  const search = useSearch({ strict: false });
+  const activeTab: WorkbookTab = (search.tab as WorkbookTab) || 'board';
   const issue = issueId ? getIssue(issueId) : undefined;
   usePageTitle(issue?.title, projectName);
   const [kanbanLeftPanelSize, setKanbanLeftPanelSize] = usePaneSize(
@@ -103,7 +116,8 @@ function ProjectKanbanLayout({ projectName }: { projectName: string }) {
     75
   );
 
-  const isRightPanelOpen = isPanelOpen;
+  const isRightPanelOpen = isPanelOpen && activeTab === 'board';
+  const showKanbanBoard = activeTab === 'board';
 
   if (isMobile) {
     return isRightPanelOpen ? (
@@ -132,38 +146,68 @@ function ProjectKanbanLayout({ projectName }: { projectName: string }) {
   };
 
   return (
-    <Group
-      orientation="horizontal"
-      className="flex-1 min-w-0 h-full"
-      defaultLayout={kanbanDefaultLayout}
-      onLayoutChange={onKanbanLayoutChange}
-    >
-      <Panel
-        id="kanban-left"
-        minSize="20%"
-        className="min-w-0 h-full overflow-hidden bg-primary"
-      >
-        <KanbanContainer />
-      </Panel>
+    <div className="flex flex-col h-full">
+      <WorkbookTabBar projectId={projectId} />
 
-      {isRightPanelOpen && (
-        <Separator
-          id="kanban-separator"
-          className="w-1 bg-panel outline-none hover:bg-brand/50 transition-colors cursor-col-resize"
-        />
-      )}
+      <div className="flex-1 min-h-0 relative overflow-hidden">
+        <AnimatePresence mode="wait">
+          {showKanbanBoard ? (
+            <motion.div
+              key="kanban"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.2, ease: 'easeInOut' }}
+              className="absolute inset-0"
+            >
+              <Group
+                orientation="horizontal"
+                className="flex-1 min-w-0 h-full"
+                defaultLayout={kanbanDefaultLayout}
+                onLayoutChange={onKanbanLayoutChange}
+              >
+                <Panel
+                  id="kanban-left"
+                  minSize="20%"
+                  className="min-w-0 h-full overflow-hidden bg-primary"
+                >
+                  <KanbanContainer />
+                </Panel>
 
-      {isRightPanelOpen && (
-        <Panel
-          id="kanban-right"
-          minSize="400px"
-          maxSize="800px"
-          className="min-w-0 h-full overflow-hidden bg-secondary"
-        >
-          <ProjectRightSidebarContainer />
-        </Panel>
-      )}
-    </Group>
+                {isRightPanelOpen && (
+                  <Separator
+                    id="kanban-separator"
+                    className="w-1 bg-panel outline-none hover:bg-brand/50 transition-colors cursor-col-resize"
+                  />
+                )}
+
+                {isRightPanelOpen && (
+                  <Panel
+                    id="kanban-right"
+                    minSize="400px"
+                    maxSize="800px"
+                    className="min-w-0 h-full overflow-hidden bg-secondary"
+                  >
+                    <ProjectRightSidebarContainer />
+                  </Panel>
+                )}
+              </Group>
+            </motion.div>
+          ) : (
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2, ease: 'easeInOut' }}
+              className="absolute inset-0 overflow-auto"
+            >
+              <WorkbookContent projectId={projectId} activeTab={activeTab} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
   );
 }
 
@@ -195,7 +239,7 @@ function ProjectKanbanInner({ projectId }: { projectId: string }) {
   return (
     <ProjectProvider projectId={projectId}>
       <ProjectMutationsRegistration>
-        <ProjectKanbanLayout projectName={project.name} />
+        <ProjectKanbanLayout projectName={project.name} projectId={projectId} />
       </ProjectMutationsRegistration>
     </ProjectProvider>
   );

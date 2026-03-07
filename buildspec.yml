@@ -1,0 +1,46 @@
+version: 0.2
+run-as: root
+
+env:
+  variables:
+    AWS_DEFAULT_REGION: us-east-1
+    ECR_ACCOUNT_ID: "970547373533"
+    ECR_REPO_NAME: vibe-kanban-v1
+    EKS_CLUSTER_NAME: ai-cart-auto-cluster
+    K8S_NAMESPACE: aicart
+    K8S_DEPLOYMENT: vibe-kanban-v1
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20
+    commands:
+      - echo "********** Install Phase **********"
+
+  pre_build:
+    commands:
+      - echo "********** Pre-build Phase **********"
+      - export REPOSITORY_URI="${ECR_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO_NAME}"
+      - export IMAGE_TAG="${CODEBUILD_RESOLVED_SOURCE_VERSION:0:8}"
+      - echo "Repository URI = $REPOSITORY_URI"
+      - echo "Image tag      = $IMAGE_TAG"
+      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin ${ECR_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
+
+  build:
+    commands:
+      - echo "********** Build Phase **********"
+      - echo "Build started on $(date)"
+      - docker build -t $REPOSITORY_URI:$IMAGE_TAG -t $REPOSITORY_URI:latest .
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - docker push $REPOSITORY_URI:latest
+      - echo "Build completed on $(date)"
+
+  post_build:
+    commands:
+      - echo "********** Post-build Phase **********"
+      - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_DEFAULT_REGION --kubeconfig /root/.kube/config
+      - export KUBECONFIG=/root/.kube/config
+      - kubectl set image deployment/$K8S_DEPLOYMENT server=$REPOSITORY_URI:$IMAGE_TAG -n $K8S_NAMESPACE
+      - kubectl rollout status deployment/$K8S_DEPLOYMENT -n $K8S_NAMESPACE --timeout=300s
+      - echo "Deployment rollout completed successfully"
