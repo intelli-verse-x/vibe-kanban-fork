@@ -35,28 +35,28 @@ export function ProjectWorkbookUserFeedback({
 
   const columns = [
     {
-      key: 'feedback_date',
+      key: 'created_at',
       label: 'Date',
       render: (item: UserFeedback) => (
         <span className="text-normal">
-          {item.feedback_date
-            ? new Date(item.feedback_date).toLocaleDateString()
+          {item.created_at
+            ? new Date(item.created_at).toLocaleDateString()
             : '-'}
         </span>
       ),
     },
     {
-      key: 'channel',
-      label: 'Channel',
+      key: 'source',
+      label: 'Source',
       render: (item: UserFeedback) => (
-        <span className="text-low">{item.channel || '-'}</span>
+        <span className="text-low">{item.source || '-'}</span>
       ),
     },
     {
-      key: 'summary',
-      label: 'Summary',
+      key: 'title',
+      label: 'Title',
       render: (item: UserFeedback) => (
-        <span className="text-normal line-clamp-2">{item.summary}</span>
+        <span className="text-normal line-clamp-2">{item.title}</span>
       ),
     },
     {
@@ -135,17 +135,25 @@ export function ProjectWorkbookUserFeedback({
           title="Create User Feedback"
           fields={[
             {
-              key: 'feedback_date',
-              label: 'Date',
-              type: 'date',
+              key: 'title',
+              label: 'Title',
+              type: 'text',
               required: true,
             },
-            { key: 'channel', label: 'Channel', type: 'text' },
+            { key: 'description', label: 'Description', type: 'textarea' },
             {
-              key: 'summary',
-              label: 'Summary',
-              type: 'textarea',
-              required: true,
+              key: 'source',
+              label: 'Source',
+              type: 'select',
+              options: [
+                { value: 'app_store', label: 'App Store' },
+                { value: 'play_store', label: 'Play Store' },
+                { value: 'email', label: 'Email' },
+                { value: 'support', label: 'Support' },
+                { value: 'survey', label: 'Survey' },
+                { value: 'social', label: 'Social' },
+                { value: 'other', label: 'Other' },
+              ],
             },
             {
               key: 'sentiment',
@@ -157,16 +165,18 @@ export function ProjectWorkbookUserFeedback({
                 { value: 'negative', label: 'Negative' },
               ],
             },
-            { key: 'action_taken', label: 'Action Taken', type: 'textarea' },
+            { key: 'customer_name', label: 'Customer Name', type: 'text' },
+            { key: 'customer_email', label: 'Customer Email', type: 'text' },
             {
               key: 'status',
               label: 'Status',
               type: 'select',
               options: [
                 { value: 'new', label: 'New' },
-                { value: 'reviewed', label: 'Reviewed' },
-                { value: 'addressed', label: 'Addressed' },
-                { value: 'closed', label: 'Closed' },
+                { value: 'reviewing', label: 'Reviewing' },
+                { value: 'planned', label: 'Planned' },
+                { value: 'implemented', label: 'Implemented' },
+                { value: 'declined', label: 'Declined' },
               ],
             },
           ]}
@@ -188,17 +198,25 @@ export function ProjectWorkbookUserFeedback({
           title="Edit User Feedback"
           fields={[
             {
-              key: 'feedback_date',
-              label: 'Date',
-              type: 'date',
+              key: 'title',
+              label: 'Title',
+              type: 'text',
               required: true,
             },
-            { key: 'channel', label: 'Channel', type: 'text' },
+            { key: 'description', label: 'Description', type: 'textarea' },
             {
-              key: 'summary',
-              label: 'Summary',
-              type: 'textarea',
-              required: true,
+              key: 'source',
+              label: 'Source',
+              type: 'select',
+              options: [
+                { value: 'app_store', label: 'App Store' },
+                { value: 'play_store', label: 'Play Store' },
+                { value: 'email', label: 'Email' },
+                { value: 'support', label: 'Support' },
+                { value: 'survey', label: 'Survey' },
+                { value: 'social', label: 'Social' },
+                { value: 'other', label: 'Other' },
+              ],
             },
             {
               key: 'sentiment',
@@ -210,16 +228,18 @@ export function ProjectWorkbookUserFeedback({
                 { value: 'negative', label: 'Negative' },
               ],
             },
-            { key: 'action_taken', label: 'Action Taken', type: 'textarea' },
+            { key: 'customer_name', label: 'Customer Name', type: 'text' },
+            { key: 'customer_email', label: 'Customer Email', type: 'text' },
             {
               key: 'status',
               label: 'Status',
               type: 'select',
               options: [
                 { value: 'new', label: 'New' },
-                { value: 'reviewed', label: 'Reviewed' },
-                { value: 'addressed', label: 'Addressed' },
-                { value: 'closed', label: 'Closed' },
+                { value: 'reviewing', label: 'Reviewing' },
+                { value: 'planned', label: 'Planned' },
+                { value: 'implemented', label: 'Implemented' },
+                { value: 'declined', label: 'Declined' },
               ],
             },
           ]}

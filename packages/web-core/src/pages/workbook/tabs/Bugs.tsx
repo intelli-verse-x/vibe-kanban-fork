@@ -21,7 +21,7 @@ import {
   getWorkbookShortcuts,
 } from './components/KeyboardShortcuts';
 import { cn } from '@/shared/lib/utils';
-import type { Bug, CreateBugRequest, UpdateBugRequest, Feature } from './types';
+import type { Bug, BugStatus, CreateBugRequest, UpdateBugRequest, Feature } from './types';
 
 // Icons as inline SVGs to avoid heroicons import issues
 const PlusIcon = () => (
@@ -440,7 +440,7 @@ export function ProjectWorkbookBugs({ projectId }: ProjectWorkbookBugsProps) {
       title: data.title as string,
       description: (data.description as string) || undefined,
       severity: (data.severity as CreateBugRequest['severity']) || undefined,
-      status: (data.status as string) || 'reported',
+      status: (data.status as BugStatus | undefined) || ('reported' as BugStatus),
       assigned_to_user_id: (data.assigned_to_user_id as string) || undefined,
       related_feature_id: (data.related_feature_id as string) || undefined,
       steps: (data.steps as string) || undefined,
@@ -463,7 +463,7 @@ export function ProjectWorkbookBugs({ projectId }: ProjectWorkbookBugsProps) {
           ? (data.severity as UpdateBugRequest['severity'])
           : undefined,
       status:
-        data.status !== undefined ? (data.status as string | null) : undefined,
+        data.status !== undefined ? (data.status as BugStatus | null) : undefined,
       assigned_to_user_id:
         data.assigned_to_user_id !== undefined
           ? (data.assigned_to_user_id as string | null) || null

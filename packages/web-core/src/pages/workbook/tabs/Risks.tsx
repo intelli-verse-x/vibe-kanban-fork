@@ -51,7 +51,11 @@ export function ProjectWorkbookRisks({ projectId }: ProjectWorkbookRisksProps) {
       key: 'risk_score',
       label: 'Risk Score',
       render: (item: Risk) => {
-        const score = item.risk_score || 0;
+        const probabilityMap: Record<string, number> = { low: 1, medium: 3, high: 5 };
+        const impactMap: Record<string, number> = { low: 1, medium: 3, high: 5, critical: 7 };
+        const prob = probabilityMap[item.probability || 'low'] || 1;
+        const imp = impactMap[item.impact || 'low'] || 1;
+        const score = prob * imp;
         const color =
           score >= 15
             ? 'text-red-500'

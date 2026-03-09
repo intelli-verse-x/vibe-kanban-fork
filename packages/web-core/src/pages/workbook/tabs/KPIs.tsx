@@ -27,42 +27,42 @@ export function ProjectWorkbookKPIs({ projectId }: ProjectWorkbookKPIsProps) {
 
   const columns = [
     {
-      key: 'metric',
+      key: 'name',
       label: 'Metric',
       render: (item: KPI) => (
-        <span className="font-medium text-normal">{item.metric}</span>
+        <span className="font-medium text-normal">{item.name}</span>
       ),
     },
     {
-      key: 'category',
-      label: 'Category',
+      key: 'unit',
+      label: 'Unit',
       render: (item: KPI) => (
-        <span className="text-low">{item.category || '-'}</span>
+        <span className="text-low">{item.unit || '-'}</span>
       ),
     },
     {
-      key: 'current',
+      key: 'current_value',
       label: 'Current',
       render: (item: KPI) => (
         <span className="text-normal font-medium">
-          {item.current !== null ? item.current : '-'}
+          {item.current_value !== null && item.current_value !== undefined ? item.current_value : '-'}
         </span>
       ),
     },
     {
-      key: 'target',
+      key: 'target_value',
       label: 'Target',
       render: (item: KPI) => (
         <span className="text-normal">
-          {item.target !== null ? item.target : '-'}
+          {item.target_value !== null && item.target_value !== undefined ? item.target_value : '-'}
         </span>
       ),
     },
     {
-      key: 'trend',
-      label: 'Trend',
+      key: 'status',
+      label: 'Status',
       render: (item: KPI) => (
-        <span className="text-low">{item.trend || '-'}</span>
+        <span className="text-low">{item.status || '-'}</span>
       ),
     },
   ];
@@ -108,12 +108,22 @@ export function ProjectWorkbookKPIs({ projectId }: ProjectWorkbookKPIsProps) {
           }}
           title="Create KPI"
           fields={[
-            { key: 'metric', label: 'Metric', type: 'text', required: true },
-            { key: 'category', label: 'Category', type: 'text' },
-            { key: 'current', label: 'Current Value', type: 'number' },
-            { key: 'target', label: 'Target Value', type: 'number' },
-            { key: 'last_week', label: 'Last Week', type: 'number' },
-            { key: 'trend', label: 'Trend', type: 'text' },
+            { key: 'name', label: 'Metric Name', type: 'text', required: true },
+            { key: 'description', label: 'Description', type: 'textarea' },
+            { key: 'current_value', label: 'Current Value', type: 'number' },
+            { key: 'target_value', label: 'Target Value', type: 'number' },
+            { key: 'unit', label: 'Unit', type: 'text' },
+            {
+              key: 'status',
+              label: 'Status',
+              type: 'select',
+              options: [
+                { value: 'on_track', label: 'On Track' },
+                { value: 'at_risk', label: 'At Risk' },
+                { value: 'off_track', label: 'Off Track' },
+                { value: 'achieved', label: 'Achieved' },
+              ],
+            },
           ]}
           isSubmitting={createKPI.isPending}
         />
@@ -132,12 +142,22 @@ export function ProjectWorkbookKPIs({ projectId }: ProjectWorkbookKPIsProps) {
           }}
           title="Edit KPI"
           fields={[
-            { key: 'metric', label: 'Metric', type: 'text', required: true },
-            { key: 'category', label: 'Category', type: 'text' },
-            { key: 'current', label: 'Current Value', type: 'number' },
-            { key: 'target', label: 'Target Value', type: 'number' },
-            { key: 'last_week', label: 'Last Week', type: 'number' },
-            { key: 'trend', label: 'Trend', type: 'text' },
+            { key: 'name', label: 'Metric Name', type: 'text', required: true },
+            { key: 'description', label: 'Description', type: 'textarea' },
+            { key: 'current_value', label: 'Current Value', type: 'number' },
+            { key: 'target_value', label: 'Target Value', type: 'number' },
+            { key: 'unit', label: 'Unit', type: 'text' },
+            {
+              key: 'status',
+              label: 'Status',
+              type: 'select',
+              options: [
+                { value: 'on_track', label: 'On Track' },
+                { value: 'at_risk', label: 'At Risk' },
+                { value: 'off_track', label: 'Off Track' },
+                { value: 'achieved', label: 'Achieved' },
+              ],
+            },
           ]}
           initialData={editingKPI}
           isSubmitting={updateKPI.isPending}

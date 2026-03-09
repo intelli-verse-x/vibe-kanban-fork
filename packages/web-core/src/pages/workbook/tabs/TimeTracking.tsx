@@ -128,7 +128,7 @@ export function ProjectWorkbookTimeTracking({
       label: 'Hours',
       render: (item: TimeEntry) => (
         <span className="font-medium text-normal">
-          {(item.hours ?? item.duration_minutes / 60).toFixed(2)}h
+          {(item.duration_minutes / 60).toFixed(2)}h
         </span>
       ),
     },
@@ -169,7 +169,7 @@ export function ProjectWorkbookTimeTracking({
 
   const totalHours =
     timeEntries?.reduce(
-      (sum, entry) => sum + (entry.hours ?? entry.duration_minutes / 60),
+      (sum, entry) => sum + (entry.duration_minutes / 60),
       0
     ) || 0;
 
@@ -237,9 +237,7 @@ export function ProjectWorkbookTimeTracking({
           fields={timeEntryFields}
           initialData={{
             date: editingEntry.date,
-            hours: (
-              editingEntry.hours ?? editingEntry.duration_minutes / 60
-            ).toString(),
+            hours: (editingEntry.duration_minutes / 60).toString(),
             description: editingEntry.description || '',
             issue_id: editingEntry.issue_id || '',
             feature_id: editingEntry.feature_id || '',

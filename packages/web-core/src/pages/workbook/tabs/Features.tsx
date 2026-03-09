@@ -40,7 +40,7 @@ const PRIORITY_OPTIONS = [
 export function ProjectWorkbookFeatures({
   projectId,
 }: ProjectWorkbookFeaturesProps) {
-  const { data: features, isLoading, refetch } = useFeatures(projectId);
+  const { data: features, isLoading } = useFeatures(projectId);
   const createFeature = useCreateFeature(projectId);
   const updateFeature = useUpdateFeature(projectId);
   const deleteFeature = useDeleteFeature(projectId);

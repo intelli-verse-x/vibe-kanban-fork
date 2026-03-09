@@ -518,6 +518,132 @@ export interface ListUserFeedbackResponse {
 }
 
 // ============================================
+// AB Test Types
+// ============================================
+export type ABTestDecision = 'pending' | 'variant_a' | 'variant_b' | 'no_difference';
+
+export interface ABTest {
+  id: string;
+  project_id: string;
+  experiment_key: string;
+  hypothesis?: string | null;
+  variant_a?: string | null;
+  variant_b?: string | null;
+  metric_measured?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  result?: string | null;
+  decision?: ABTestDecision | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateABTestRequest {
+  experiment_key: string;
+  hypothesis?: string;
+  variant_a?: string;
+  variant_b?: string;
+  metric_measured?: string;
+  start_date?: string;
+  end_date?: string;
+  result?: string;
+  decision?: ABTestDecision;
+}
+
+export interface UpdateABTestRequest {
+  experiment_key?: string;
+  hypothesis?: string | null;
+  variant_a?: string | null;
+  variant_b?: string | null;
+  metric_measured?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  result?: string | null;
+  decision?: ABTestDecision | null;
+}
+
+export interface ListABTestsResponse {
+  ab_tests: ABTest[];
+  total: number;
+}
+
+// ============================================
+// Monetization Types
+// ============================================
+export type MonetizationStatus = 'active' | 'paused' | 'testing';
+
+export interface MonetizationItem {
+  id: string;
+  project_id: string;
+  revenue_stream: string;
+  monthly_revenue?: number | null;
+  conversion_pct?: number | null;
+  optimization_idea?: string | null;
+  status?: MonetizationStatus | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateMonetizationItemRequest {
+  revenue_stream: string;
+  monthly_revenue?: number;
+  conversion_pct?: number;
+  optimization_idea?: string;
+  status?: MonetizationStatus;
+}
+
+export interface UpdateMonetizationItemRequest {
+  revenue_stream?: string;
+  monthly_revenue?: number | null;
+  conversion_pct?: number | null;
+  optimization_idea?: string | null;
+  status?: MonetizationStatus | null;
+}
+
+export interface ListMonetizationItemsResponse {
+  monetization_items: MonetizationItem[];
+  total: number;
+}
+
+// ============================================
+// KPI Feature Matrix Types
+// ============================================
+export interface KPIFeatureMatrix {
+  id: string;
+  project_id: string;
+  feature_id: string;
+  dau_impact_1_5?: number | null;
+  retention_impact_1_5?: number | null;
+  arpu_impact_1_5?: number | null;
+  virality_impact_1_5?: number | null;
+  strategic_value_1_5?: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateKPIFeatureMatrixRequest {
+  feature_id: string;
+  dau_impact_1_5?: number;
+  retention_impact_1_5?: number;
+  arpu_impact_1_5?: number;
+  virality_impact_1_5?: number;
+  strategic_value_1_5?: number;
+}
+
+export interface UpdateKPIFeatureMatrixRequest {
+  dau_impact_1_5?: number | null;
+  retention_impact_1_5?: number | null;
+  arpu_impact_1_5?: number | null;
+  virality_impact_1_5?: number | null;
+  strategic_value_1_5?: number | null;
+}
+
+export interface ListKPIFeatureMatrixResponse {
+  kpi_feature_matrix: KPIFeatureMatrix[];
+  total: number;
+}
+
+// ============================================
 // Member Types
 // ============================================
 
