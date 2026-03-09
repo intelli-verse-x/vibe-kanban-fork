@@ -150,8 +150,9 @@ async fn list_features(
             tracing::error!(?e, %project_id, "failed to list features");
             ErrorResponse::new(StatusCode::INTERNAL_SERVER_ERROR, "failed to list features")
         })?;
+    let total = features.len() as i64;
 
-    Ok(Json(ListFeaturesResponse { features }))
+    Ok(Json(ListFeaturesResponse { features, total }))
 }
 
 #[instrument(name = "workbook.get_feature", skip(state, ctx))]
@@ -263,8 +264,9 @@ async fn list_kpis(
             tracing::error!(?e, %project_id, "failed to list kpis");
             ErrorResponse::new(StatusCode::INTERNAL_SERVER_ERROR, "failed to list kpis")
         })?;
+    let total = kpis.len() as i64;
 
-    Ok(Json(ListKPIsResponse { kpis }))
+    Ok(Json(ListKPIsResponse { kpis, total }))
 }
 
 #[instrument(name = "workbook.get_kpi", skip(state, ctx))]
@@ -376,8 +378,9 @@ async fn list_bugs(
             tracing::error!(?e, %project_id, "failed to list bugs");
             ErrorResponse::new(StatusCode::INTERNAL_SERVER_ERROR, "failed to list bugs")
         })?;
+    let total = bugs.len() as i64;
 
-    Ok(Json(ListBugsResponse { bugs }))
+    Ok(Json(ListBugsResponse { bugs, total }))
 }
 
 #[instrument(name = "workbook.get_bug", skip(state, ctx))]
@@ -489,8 +492,9 @@ async fn list_risks(
             tracing::error!(?e, %project_id, "failed to list risks");
             ErrorResponse::new(StatusCode::INTERNAL_SERVER_ERROR, "failed to list risks")
         })?;
+    let total = risks.len() as i64;
 
-    Ok(Json(ListRisksResponse { risks }))
+    Ok(Json(ListRisksResponse { risks, total }))
 }
 
 #[instrument(name = "workbook.get_risk", skip(state, ctx))]
@@ -602,8 +606,9 @@ async fn list_sprints(
             tracing::error!(?e, %project_id, "failed to list sprints");
             ErrorResponse::new(StatusCode::INTERNAL_SERVER_ERROR, "failed to list sprints")
         })?;
+    let total = sprints.len() as i64;
 
-    Ok(Json(ListSprintsResponse { sprints }))
+    Ok(Json(ListSprintsResponse { sprints, total }))
 }
 
 #[instrument(name = "workbook.get_sprint", skip(state, ctx))]
@@ -718,14 +723,15 @@ async fn list_sprint_items(
 
     ensure_project_access(state.pool(), ctx.user.id, sprint.project_id).await?;
 
-    let items = SprintItemsRepository::list_by_sprint(state.pool(), sprint_id)
+    let sprint_items = SprintItemsRepository::list_by_sprint(state.pool(), sprint_id)
         .await
         .map_err(|e| {
             tracing::error!(?e, %sprint_id, "failed to list sprint items");
             ErrorResponse::new(StatusCode::INTERNAL_SERVER_ERROR, "failed to list sprint items")
         })?;
+    let total = sprint_items.len() as i64;
 
-    Ok(Json(ListSprintItemsResponse { items }))
+    Ok(Json(ListSprintItemsResponse { sprint_items, total }))
 }
 
 #[instrument(name = "workbook.get_sprint_item", skip(state, ctx))]
@@ -837,8 +843,9 @@ async fn list_releases(
             tracing::error!(?e, %project_id, "failed to list releases");
             ErrorResponse::new(StatusCode::INTERNAL_SERVER_ERROR, "failed to list releases")
         })?;
+    let total = releases.len() as i64;
 
-    Ok(Json(ListReleasesResponse { releases }))
+    Ok(Json(ListReleasesResponse { releases, total }))
 }
 
 #[instrument(name = "workbook.get_release", skip(state, ctx))]
@@ -944,14 +951,15 @@ async fn list_time_entries(
 ) -> Result<Json<ListTimeEntriesResponse>, ErrorResponse> {
     ensure_project_access(state.pool(), ctx.user.id, project_id).await?;
 
-    let entries = TimeEntriesRepository::list_by_project(state.pool(), project_id)
+    let time_entries = TimeEntriesRepository::list_by_project(state.pool(), project_id)
         .await
         .map_err(|e| {
             tracing::error!(?e, %project_id, "failed to list time entries");
             ErrorResponse::new(StatusCode::INTERNAL_SERVER_ERROR, "failed to list time entries")
         })?;
+    let total = time_entries.len() as i64;
 
-    Ok(Json(ListTimeEntriesResponse { entries }))
+    Ok(Json(ListTimeEntriesResponse { time_entries, total }))
 }
 
 #[instrument(name = "workbook.get_time_entry", skip(state, ctx))]
@@ -1063,8 +1071,9 @@ async fn list_feedback(
             tracing::error!(?e, %project_id, "failed to list feedback");
             ErrorResponse::new(StatusCode::INTERNAL_SERVER_ERROR, "failed to list feedback")
         })?;
+    let total = feedback.len() as i64;
 
-    Ok(Json(ListUserFeedbackResponse { feedback }))
+    Ok(Json(ListUserFeedbackResponse { feedback, total }))
 }
 
 #[instrument(name = "workbook.get_feedback", skip(state, ctx))]
