@@ -71,7 +71,7 @@ export function useDashboardStats(projectId: string | undefined) {
     queryFn: async () => {
       if (!projectId) throw new Error('Project ID required');
       const response = await makeRequest(
-        `/v1/projects/${projectId}/workbook/dashboard/stats`
+        `/v1/projects/${projectId}/workbook/dashboard`
       );
       return handleResponse<DashboardStats>(response);
     },
@@ -85,7 +85,9 @@ export function useFeatures(projectId: string | undefined) {
     queryKey: ['features', projectId],
     queryFn: async () => {
       if (!projectId) throw new Error('Project ID required');
-      const response = await makeRequest(`/v1/projects/${projectId}/features`);
+      const response = await makeRequest(
+        `/v1/projects/${projectId}/workbook/features`
+      );
       const data = await handleResponse<ListFeaturesResponse>(response);
       return data.features;
     },
@@ -98,10 +100,13 @@ export function useCreateFeature(projectId: string | undefined) {
   return useMutation({
     mutationFn: async (data: CreateFeatureRequest) => {
       if (!projectId) throw new Error('Project ID required');
-      const response = await makeRequest(`/v1/projects/${projectId}/features`, {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
+      const response = await makeRequest(
+        `/v1/projects/${projectId}/workbook/features`,
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        }
+      );
       return handleResponse<Feature>(response);
     },
     onSuccess: () => {
@@ -121,13 +126,10 @@ export function useUpdateFeature(projectId: string | undefined) {
       data: UpdateFeatureRequest;
     }) => {
       if (!projectId) throw new Error('Project ID required');
-      const response = await makeRequest(
-        `/v1/projects/${projectId}/features/${id}`,
-        {
-          method: 'PUT',
-          body: JSON.stringify(data),
-        }
-      );
+      const response = await makeRequest(`/v1/workbook/features/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
       return handleResponse<Feature>(response);
     },
     onSuccess: () => {
@@ -141,12 +143,9 @@ export function useDeleteFeature(projectId: string | undefined) {
   return useMutation({
     mutationFn: async (id: string) => {
       if (!projectId) throw new Error('Project ID required');
-      const response = await makeRequest(
-        `/v1/projects/${projectId}/features/${id}`,
-        {
-          method: 'DELETE',
-        }
-      );
+      const response = await makeRequest(`/v1/workbook/features/${id}`, {
+        method: 'DELETE',
+      });
       return handleResponse<void>(response);
     },
     onSuccess: () => {
@@ -205,13 +204,10 @@ export function useUpdateKPI(projectId: string | undefined) {
       data: UpdateKPIRequest;
     }) => {
       if (!projectId) throw new Error('Project ID required');
-      const response = await makeRequest(
-        `/v1/projects/${projectId}/workbook/kpis/${id}`,
-        {
-          method: 'PUT',
-          body: JSON.stringify(data),
-        }
-      );
+      const response = await makeRequest(`/v1/workbook/kpis/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
       return handleResponse<KPI>(response);
     },
     onSuccess: () => {
@@ -228,12 +224,9 @@ export function useDeleteKPI(projectId: string | undefined) {
   return useMutation({
     mutationFn: async (id: string) => {
       if (!projectId) throw new Error('Project ID required');
-      const response = await makeRequest(
-        `/v1/projects/${projectId}/workbook/kpis/${id}`,
-        {
-          method: 'DELETE',
-        }
-      );
+      const response = await makeRequest(`/v1/workbook/kpis/${id}`, {
+        method: 'DELETE',
+      });
       return handleResponse<void>(response);
     },
     onSuccess: () => {
@@ -292,13 +285,10 @@ export function useUpdateBug(projectId: string | undefined) {
       data: UpdateBugRequest;
     }) => {
       if (!projectId) throw new Error('Project ID required');
-      const response = await makeRequest(
-        `/v1/projects/${projectId}/workbook/bugs/${id}`,
-        {
-          method: 'PUT',
-          body: JSON.stringify(data),
-        }
-      );
+      const response = await makeRequest(`/v1/workbook/bugs/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
       return handleResponse<Bug>(response);
     },
     onSuccess: () => {
@@ -312,12 +302,9 @@ export function useDeleteBug(projectId: string | undefined) {
   return useMutation({
     mutationFn: async (id: string) => {
       if (!projectId) throw new Error('Project ID required');
-      const response = await makeRequest(
-        `/v1/projects/${projectId}/workbook/bugs/${id}`,
-        {
-          method: 'DELETE',
-        }
-      );
+      const response = await makeRequest(`/v1/workbook/bugs/${id}`, {
+        method: 'DELETE',
+      });
       return handleResponse<void>(response);
     },
     onSuccess: () => {
@@ -373,13 +360,10 @@ export function useUpdateRisk(projectId: string | undefined) {
       data: UpdateRiskRequest;
     }) => {
       if (!projectId) throw new Error('Project ID required');
-      const response = await makeRequest(
-        `/v1/projects/${projectId}/workbook/risks/${id}`,
-        {
-          method: 'PUT',
-          body: JSON.stringify(data),
-        }
-      );
+      const response = await makeRequest(`/v1/workbook/risks/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
       return handleResponse<Risk>(response);
     },
     onSuccess: () => {
@@ -393,12 +377,9 @@ export function useDeleteRisk(projectId: string | undefined) {
   return useMutation({
     mutationFn: async (id: string) => {
       if (!projectId) throw new Error('Project ID required');
-      const response = await makeRequest(
-        `/v1/projects/${projectId}/workbook/risks/${id}`,
-        {
-          method: 'DELETE',
-        }
-      );
+      const response = await makeRequest(`/v1/workbook/risks/${id}`, {
+        method: 'DELETE',
+      });
       return handleResponse<void>(response);
     },
     onSuccess: () => {
@@ -454,13 +435,10 @@ export function useUpdateSprintItem(projectId: string | undefined) {
       data: UpdateSprintItemRequest;
     }) => {
       if (!projectId) throw new Error('Project ID required');
-      const response = await makeRequest(
-        `/v1/projects/${projectId}/workbook/sprint-items/${id}`,
-        {
-          method: 'PUT',
-          body: JSON.stringify(data),
-        }
-      );
+      const response = await makeRequest(`/v1/workbook/sprint-items/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
       return handleResponse<SprintItem>(response);
     },
     onSuccess: () => {
@@ -474,12 +452,9 @@ export function useDeleteSprintItem(projectId: string | undefined) {
   return useMutation({
     mutationFn: async (id: string) => {
       if (!projectId) throw new Error('Project ID required');
-      const response = await makeRequest(
-        `/v1/projects/${projectId}/workbook/sprint-items/${id}`,
-        {
-          method: 'DELETE',
-        }
-      );
+      const response = await makeRequest(`/v1/workbook/sprint-items/${id}`, {
+        method: 'DELETE',
+      });
       return handleResponse<void>(response);
     },
     onSuccess: () => {
@@ -495,7 +470,7 @@ export function useUserFeedback(projectId: string | undefined) {
     queryFn: async () => {
       if (!projectId) throw new Error('Project ID required');
       const response = await makeRequest(
-        `/v1/projects/${projectId}/workbook/user-feedback`
+        `/v1/projects/${projectId}/workbook/feedback`
       );
       const data = await handleResponse<ListUserFeedbackResponse>(response);
       return data.feedback;
@@ -510,7 +485,7 @@ export function useCreateUserFeedback(projectId: string | undefined) {
     mutationFn: async (data: CreateUserFeedbackRequest) => {
       if (!projectId) throw new Error('Project ID required');
       const response = await makeRequest(
-        `/v1/projects/${projectId}/workbook/user-feedback`,
+        `/v1/projects/${projectId}/workbook/feedback`,
         {
           method: 'POST',
           body: JSON.stringify(data),
@@ -535,13 +510,10 @@ export function useUpdateUserFeedback(projectId: string | undefined) {
       data: UpdateUserFeedbackRequest;
     }) => {
       if (!projectId) throw new Error('Project ID required');
-      const response = await makeRequest(
-        `/v1/projects/${projectId}/workbook/user-feedback/${id}`,
-        {
-          method: 'PUT',
-          body: JSON.stringify(data),
-        }
-      );
+      const response = await makeRequest(`/v1/workbook/feedback/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
       return handleResponse<UserFeedback>(response);
     },
     onSuccess: () => {
@@ -555,12 +527,9 @@ export function useDeleteUserFeedback(projectId: string | undefined) {
   return useMutation({
     mutationFn: async (id: string) => {
       if (!projectId) throw new Error('Project ID required');
-      const response = await makeRequest(
-        `/v1/projects/${projectId}/workbook/user-feedback/${id}`,
-        {
-          method: 'DELETE',
-        }
-      );
+      const response = await makeRequest(`/v1/workbook/feedback/${id}`, {
+        method: 'DELETE',
+      });
       return handleResponse<void>(response);
     },
     onSuccess: () => {
@@ -616,13 +585,10 @@ export function useUpdateRelease(projectId: string | undefined) {
       data: UpdateReleaseRequest;
     }) => {
       if (!projectId) throw new Error('Project ID required');
-      const response = await makeRequest(
-        `/v1/projects/${projectId}/workbook/releases/${id}`,
-        {
-          method: 'PUT',
-          body: JSON.stringify(data),
-        }
-      );
+      const response = await makeRequest(`/v1/workbook/releases/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
       return handleResponse<Release>(response);
     },
     onSuccess: () => {
@@ -636,12 +602,9 @@ export function useDeleteRelease(projectId: string | undefined) {
   return useMutation({
     mutationFn: async (id: string) => {
       if (!projectId) throw new Error('Project ID required');
-      const response = await makeRequest(
-        `/v1/projects/${projectId}/workbook/releases/${id}`,
-        {
-          method: 'DELETE',
-        }
-      );
+      const response = await makeRequest(`/v1/workbook/releases/${id}`, {
+        method: 'DELETE',
+      });
       return handleResponse<void>(response);
     },
     onSuccess: () => {
@@ -907,7 +870,7 @@ export function useTimeEntries(projectId: string | undefined) {
     queryFn: async () => {
       if (!projectId) throw new Error('Project ID required');
       const response = await makeRequest(
-        `/v1/projects/${projectId}/time-entries`
+        `/v1/projects/${projectId}/workbook/time-entries`
       );
       const data = await handleResponse<ListTimeEntriesResponse>(response);
       return data.time_entries;
@@ -922,7 +885,7 @@ export function useCreateTimeEntry(projectId: string | undefined) {
     mutationFn: async (data: CreateTimeEntryRequest) => {
       if (!projectId) throw new Error('Project ID required');
       const response = await makeRequest(
-        `/v1/projects/${projectId}/time-entries`,
+        `/v1/projects/${projectId}/workbook/time-entries`,
         {
           method: 'POST',
           body: JSON.stringify(data),
@@ -947,13 +910,10 @@ export function useUpdateTimeEntry(projectId: string | undefined) {
       data: UpdateTimeEntryRequest;
     }) => {
       if (!projectId) throw new Error('Project ID required');
-      const response = await makeRequest(
-        `/v1/projects/${projectId}/time-entries/${id}`,
-        {
-          method: 'PUT',
-          body: JSON.stringify(data),
-        }
-      );
+      const response = await makeRequest(`/v1/workbook/time-entries/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
       return handleResponse<TimeEntry>(response);
     },
     onSuccess: () => {
@@ -967,12 +927,9 @@ export function useDeleteTimeEntry(projectId: string | undefined) {
   return useMutation({
     mutationFn: async (id: string) => {
       if (!projectId) throw new Error('Project ID required');
-      const response = await makeRequest(
-        `/v1/projects/${projectId}/time-entries/${id}`,
-        {
-          method: 'DELETE',
-        }
-      );
+      const response = await makeRequest(`/v1/workbook/time-entries/${id}`, {
+        method: 'DELETE',
+      });
       return handleResponse<void>(response);
     },
     onSuccess: () => {

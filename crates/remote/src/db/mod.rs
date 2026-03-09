@@ -28,6 +28,7 @@ pub mod reviews;
 pub mod tags;
 pub mod types;
 pub mod users;
+pub mod workbook;
 pub mod workspaces;
 
 use sqlx::{

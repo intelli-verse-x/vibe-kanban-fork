@@ -48,6 +48,7 @@ mod pull_requests;
 mod review;
 pub mod tags;
 mod tokens;
+mod workbook;
 mod workspaces;
 
 pub fn router(state: AppState) -> Router {
@@ -127,6 +128,7 @@ pub fn router(state: AppState) -> Router {
         .merge(pull_requests::router())
         .merge(notifications::router())
         .merge(workspaces::router())
+        .merge(workbook::router())
         .merge(billing::protected_router())
         .merge(migration::router())
         .layer(middleware::from_fn_with_state(

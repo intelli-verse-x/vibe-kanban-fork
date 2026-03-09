@@ -26,19 +26,19 @@ export function FeatureTable({
               Title
             </th>
             <th className="text-left p-base text-sm font-medium text-normal">
-              Category
+              Status
+            </th>
+            <th className="text-left p-base text-sm font-medium text-normal">
+              Priority
             </th>
             <th className="text-left p-base text-sm font-medium text-normal">
               Owner
             </th>
             <th className="text-left p-base text-sm font-medium text-normal">
-              Status
+              Target Date
             </th>
             <th className="text-left p-base text-sm font-medium text-normal">
-              Risk Level
-            </th>
-            <th className="text-left p-base text-sm font-medium text-normal">
-              Target Release
+              Progress
             </th>
           </tr>
         </thead>
@@ -59,22 +59,22 @@ export function FeatureTable({
               <td className="p-base text-sm text-normal font-medium">
                 {feature.title}
               </td>
-              <td className="p-base text-sm text-low">
-                {feature.category || '-'}
+              <td className="p-base">
+                <StatusBadge status={feature.status} />
+              </td>
+              <td className="p-base">
+                <PriorityBadge priority={feature.priority} />
               </td>
               <td className="p-base text-sm text-low">
                 {feature.owner_user_id ? 'Assigned' : '-'}
               </td>
-              <td className="p-base">
-                <StatusBadge status={feature.working_status} />
-              </td>
-              <td className="p-base">
-                <RiskBadge risk={feature.risk_level} />
+              <td className="p-base text-sm text-low">
+                {feature.target_date
+                  ? new Date(feature.target_date).toLocaleDateString()
+                  : '-'}
               </td>
               <td className="p-base text-sm text-low">
-                {feature.target_release_date
-                  ? new Date(feature.target_release_date).toLocaleDateString()
-                  : '-'}
+                {feature.progress != null ? `${feature.progress}%` : '-'}
               </td>
             </tr>
           ))}
@@ -107,8 +107,8 @@ function StatusBadge({ status }: { status: string | null | undefined }) {
   );
 }
 
-function RiskBadge({ risk }: { risk: string | null | undefined }) {
-  if (!risk) return <span className="text-low">-</span>;
+function PriorityBadge({ priority }: { priority: string | null | undefined }) {
+  if (!priority) return <span className="text-low">-</span>;
 
   const colors: Record<string, string> = {
     low: 'bg-green-500',
@@ -121,10 +121,10 @@ function RiskBadge({ risk }: { risk: string | null | undefined }) {
     <span
       className={cn(
         'px-2 py-1 rounded text-xs font-medium text-white',
-        colors[risk] || 'bg-gray-500'
+        colors[priority] || 'bg-gray-500'
       )}
     >
-      {risk}
+      {priority}
     </span>
   );
 }

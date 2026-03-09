@@ -33,38 +33,68 @@ export function ProjectWorkbookReleases({
 
   const columns = [
     {
+      key: 'name',
+      label: 'Name',
+      render: (item: Release) => (
+        <span className="font-medium text-normal">{item.name}</span>
+      ),
+    },
+    {
       key: 'version',
       label: 'Version',
       render: (item: Release) => (
-        <span className="font-mono font-medium text-normal">
-          {item.version}
+        <span className="font-mono text-normal">
+          {item.version || '-'}
         </span>
       ),
     },
     {
-      key: 'release_date',
-      label: 'Release Date',
+      key: 'status',
+      label: 'Status',
+      render: (item: Release) => {
+        const statusColors: Record<string, string> = {
+          planning: 'bg-gray-500',
+          in_progress: 'bg-blue-500',
+          testing: 'bg-yellow-500',
+          released: 'bg-green-500',
+          cancelled: 'bg-red-500',
+        };
+        const status = item.status || 'planning';
+        return (
+          <span
+            className={`px-2 py-1 rounded text-xs text-white ${statusColors[status] || 'bg-gray-500'}`}
+          >
+            {status.replace('_', ' ')}
+          </span>
+        );
+      },
+    },
+    {
+      key: 'release_type',
+      label: 'Type',
+      render: (item: Release) => (
+        <span className="text-low">{item.release_type || '-'}</span>
+      ),
+    },
+    {
+      key: 'planned_date',
+      label: 'Planned Date',
       render: (item: Release) => (
         <span className="text-normal">
-          {item.release_date
-            ? new Date(item.release_date).toLocaleDateString()
+          {item.planned_date
+            ? new Date(item.planned_date).toLocaleDateString()
             : '-'}
         </span>
       ),
     },
     {
-      key: 'rollout_pct',
-      label: 'Rollout %',
+      key: 'released_at',
+      label: 'Released At',
       render: (item: Release) => (
-        <span className="text-normal">{item.rollout_pct || 0}%</span>
-      ),
-    },
-    {
-      key: 'major_bugs',
-      label: 'Major Bugs',
-      render: (item: Release) => (
-        <span className={item.major_bugs ? 'text-error' : 'text-normal'}>
-          {item.major_bugs || 0}
+        <span className="text-normal">
+          {item.released_at
+            ? new Date(item.released_at).toLocaleDateString()
+            : '-'}
         </span>
       ),
     },
@@ -111,16 +141,34 @@ export function ProjectWorkbookReleases({
           }}
           title="Create Release"
           fields={[
-            { key: 'version', label: 'Version', type: 'text', required: true },
-            { key: 'release_date', label: 'Release Date', type: 'date' },
-            { key: 'rollout_pct', label: 'Rollout %', type: 'number' },
-            { key: 'major_bugs', label: 'Major Bugs', type: 'number' },
-            { key: 'rollback_plan', label: 'Rollback Plan', type: 'textarea' },
+            { key: 'name', label: 'Name', type: 'text', required: true },
+            { key: 'version', label: 'Version', type: 'text' },
+            { key: 'description', label: 'Description', type: 'textarea' },
             {
-              key: 'post_release_issues',
-              label: 'Post-Release Issues',
-              type: 'textarea',
+              key: 'status',
+              label: 'Status',
+              type: 'select',
+              options: [
+                { value: 'planning', label: 'Planning' },
+                { value: 'in_progress', label: 'In Progress' },
+                { value: 'testing', label: 'Testing' },
+                { value: 'released', label: 'Released' },
+                { value: 'cancelled', label: 'Cancelled' },
+              ],
             },
+            {
+              key: 'release_type',
+              label: 'Release Type',
+              type: 'select',
+              options: [
+                { value: 'major', label: 'Major' },
+                { value: 'minor', label: 'Minor' },
+                { value: 'patch', label: 'Patch' },
+                { value: 'hotfix', label: 'Hotfix' },
+              ],
+            },
+            { key: 'planned_date', label: 'Planned Date', type: 'date' },
+            { key: 'release_notes', label: 'Release Notes', type: 'textarea' },
           ]}
           isSubmitting={createRelease.isPending}
         />
@@ -139,16 +187,35 @@ export function ProjectWorkbookReleases({
           }}
           title="Edit Release"
           fields={[
-            { key: 'version', label: 'Version', type: 'text', required: true },
-            { key: 'release_date', label: 'Release Date', type: 'date' },
-            { key: 'rollout_pct', label: 'Rollout %', type: 'number' },
-            { key: 'major_bugs', label: 'Major Bugs', type: 'number' },
-            { key: 'rollback_plan', label: 'Rollback Plan', type: 'textarea' },
+            { key: 'name', label: 'Name', type: 'text', required: true },
+            { key: 'version', label: 'Version', type: 'text' },
+            { key: 'description', label: 'Description', type: 'textarea' },
             {
-              key: 'post_release_issues',
-              label: 'Post-Release Issues',
-              type: 'textarea',
+              key: 'status',
+              label: 'Status',
+              type: 'select',
+              options: [
+                { value: 'planning', label: 'Planning' },
+                { value: 'in_progress', label: 'In Progress' },
+                { value: 'testing', label: 'Testing' },
+                { value: 'released', label: 'Released' },
+                { value: 'cancelled', label: 'Cancelled' },
+              ],
             },
+            {
+              key: 'release_type',
+              label: 'Release Type',
+              type: 'select',
+              options: [
+                { value: 'major', label: 'Major' },
+                { value: 'minor', label: 'Minor' },
+                { value: 'patch', label: 'Patch' },
+                { value: 'hotfix', label: 'Hotfix' },
+              ],
+            },
+            { key: 'planned_date', label: 'Planned Date', type: 'date' },
+            { key: 'released_at', label: 'Released At', type: 'date' },
+            { key: 'release_notes', label: 'Release Notes', type: 'textarea' },
           ]}
           initialData={editingRelease}
           isSubmitting={updateRelease.isPending}

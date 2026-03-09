@@ -30,6 +30,7 @@ pub mod relay;
 pub mod response;
 pub mod tag;
 pub mod user;
+pub mod workbook;
 pub mod workspace;
 pub mod workspaces;
 
@@ -56,6 +57,7 @@ pub use relay::*;
 pub use response::*;
 pub use tag::*;
 pub use user::*;
+pub use workbook::*;
 pub use workspace::*;
 pub use workspaces::*;
 

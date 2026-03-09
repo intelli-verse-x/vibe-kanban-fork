@@ -12,6 +12,18 @@ use api_types::{
     UpdateIssueCommentReactionRequest, UpdateIssueCommentRequest, UpdateIssueRequest,
     UpdateNotificationRequest, UpdateProjectRequest, UpdateProjectStatusRequest, UpdateTagRequest,
     User, UserData, Workspace,
+    // Workbook types
+    Bug, BugSeverity, BugStatus, CreateBugRequest, ListBugsResponse, UpdateBugRequest,
+    CreateFeatureRequest, CreateKPIRequest, CreateReleaseRequest, CreateRiskRequest,
+    CreateSprintItemRequest, CreateSprintRequest, CreateTimeEntryRequest, CreateUserFeedbackRequest,
+    DashboardStats, Feature, FeaturePriority, FeatureStatus, FeedbackCategory, FeedbackPriority,
+    FeedbackSentiment, FeedbackSource, FeedbackStatus, KPI, KPIFrequency, KPIStatus,
+    ListFeaturesResponse, ListKPIsResponse, ListReleasesResponse, ListRisksResponse,
+    ListSprintItemsResponse, ListSprintsResponse, ListTimeEntriesResponse, ListUserFeedbackResponse,
+    Release, ReleaseStatus, ReleaseType, Risk, RiskCategory, RiskImpact, RiskProbability, RiskStatus,
+    Sprint, SprintItem, SprintItemStatus, SprintStatus, TimeEntry, UpdateFeatureRequest,
+    UpdateKPIRequest, UpdateReleaseRequest, UpdateRiskRequest, UpdateSprintItemRequest,
+    UpdateSprintRequest, UpdateTimeEntryRequest, UpdateUserFeedbackRequest, UserFeedback,
 };
 use remote::{
     routes::{
@@ -127,6 +139,71 @@ fn export_shapes() -> String {
         CommitAttachmentsRequest::decl(),
         CommitAttachmentsResponse::decl(),
         AttachmentUrlResponse::decl(),
+        // Workbook types - Features
+        Feature::decl(),
+        FeatureStatus::decl(),
+        FeaturePriority::decl(),
+        CreateFeatureRequest::decl(),
+        UpdateFeatureRequest::decl(),
+        ListFeaturesResponse::decl(),
+        // Workbook types - KPIs
+        KPI::decl(),
+        KPIStatus::decl(),
+        KPIFrequency::decl(),
+        CreateKPIRequest::decl(),
+        UpdateKPIRequest::decl(),
+        ListKPIsResponse::decl(),
+        // Workbook types - Bugs
+        Bug::decl(),
+        BugSeverity::decl(),
+        BugStatus::decl(),
+        CreateBugRequest::decl(),
+        UpdateBugRequest::decl(),
+        ListBugsResponse::decl(),
+        // Workbook types - Risks
+        Risk::decl(),
+        RiskCategory::decl(),
+        RiskProbability::decl(),
+        RiskImpact::decl(),
+        RiskStatus::decl(),
+        CreateRiskRequest::decl(),
+        UpdateRiskRequest::decl(),
+        ListRisksResponse::decl(),
+        // Workbook types - Sprints
+        Sprint::decl(),
+        SprintStatus::decl(),
+        SprintItem::decl(),
+        SprintItemStatus::decl(),
+        CreateSprintRequest::decl(),
+        UpdateSprintRequest::decl(),
+        CreateSprintItemRequest::decl(),
+        UpdateSprintItemRequest::decl(),
+        ListSprintsResponse::decl(),
+        ListSprintItemsResponse::decl(),
+        // Workbook types - Releases
+        Release::decl(),
+        ReleaseStatus::decl(),
+        ReleaseType::decl(),
+        CreateReleaseRequest::decl(),
+        UpdateReleaseRequest::decl(),
+        ListReleasesResponse::decl(),
+        // Workbook types - Time Entries
+        TimeEntry::decl(),
+        CreateTimeEntryRequest::decl(),
+        UpdateTimeEntryRequest::decl(),
+        ListTimeEntriesResponse::decl(),
+        // Workbook types - User Feedback
+        UserFeedback::decl(),
+        FeedbackSource::decl(),
+        FeedbackSentiment::decl(),
+        FeedbackCategory::decl(),
+        FeedbackStatus::decl(),
+        FeedbackPriority::decl(),
+        CreateUserFeedbackRequest::decl(),
+        UpdateUserFeedbackRequest::decl(),
+        ListUserFeedbackResponse::decl(),
+        // Workbook types - Dashboard
+        DashboardStats::decl(),
     ];
 
     for decl in type_decls {

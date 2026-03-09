@@ -49,55 +49,66 @@ export function FeatureDetailPanel({
           <div className="mt-1 text-sm text-normal">{feature.title}</div>
         </div>
 
-        {feature.category && (
+        {feature.description && (
           <div>
             <label className="text-xs font-medium text-low uppercase">
-              Category
-            </label>
-            <div className="mt-1 text-sm text-normal">{feature.category}</div>
-          </div>
-        )}
-
-        {feature.problem_statement && (
-          <div>
-            <label className="text-xs font-medium text-low uppercase">
-              Problem Statement
+              Description
             </label>
             <div className="mt-1 text-sm text-normal whitespace-pre-wrap">
-              {feature.problem_statement}
+              {feature.description}
             </div>
           </div>
         )}
 
-        {feature.business_goal && (
+        {feature.status && (
           <div>
             <label className="text-xs font-medium text-low uppercase">
-              Business Goal
+              Status
             </label>
-            <div className="mt-1 text-sm text-normal whitespace-pre-wrap">
-              {feature.business_goal}
+            <div className="mt-1 text-sm text-normal capitalize">
+              {String(feature.status).replace('_', ' ')}
             </div>
           </div>
         )}
 
-        {feature.notes && (
+        {feature.priority && (
           <div>
             <label className="text-xs font-medium text-low uppercase">
-              Notes
+              Priority
             </label>
-            <div className="mt-1 text-sm text-normal whitespace-pre-wrap">
-              {feature.notes}
+            <div className="mt-1 text-sm text-normal capitalize">
+              {feature.priority}
             </div>
           </div>
         )}
 
-        {feature.target_release_date && (
+        {feature.progress != null && (
           <div>
             <label className="text-xs font-medium text-low uppercase">
-              Target Release
+              Progress
+            </label>
+            <div className="mt-1 text-sm text-normal">{feature.progress}%</div>
+          </div>
+        )}
+
+        {feature.start_date && (
+          <div>
+            <label className="text-xs font-medium text-low uppercase">
+              Start Date
             </label>
             <div className="mt-1 text-sm text-normal">
-              {new Date(feature.target_release_date).toLocaleDateString()}
+              {new Date(feature.start_date).toLocaleDateString()}
+            </div>
+          </div>
+        )}
+
+        {feature.target_date && (
+          <div>
+            <label className="text-xs font-medium text-low uppercase">
+              Target Date
+            </label>
+            <div className="mt-1 text-sm text-normal">
+              {new Date(feature.target_date).toLocaleDateString()}
             </div>
           </div>
         )}
