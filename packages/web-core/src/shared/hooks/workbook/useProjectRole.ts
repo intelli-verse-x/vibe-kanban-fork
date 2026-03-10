@@ -1,6 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { makeRequest, getRemoteApiUrl } from '@/shared/lib/remoteApi';
 import { useAuth } from '@/shared/hooks/auth/useAuth';
+import {
+  MemberRole,
+  type OrganizationMemberWithProfile,
+  type ListMembersResponse,
+} from 'shared/types';
 
 export type ProjectRole =
   | 'admin'
@@ -9,22 +14,6 @@ export type ProjectRole =
   | 'project_owner'
   | 'developer'
   | 'worker';
-
-// Organization member roles that map to project privileges
-type OrgMemberRole = 'owner' | 'admin' | 'moderator' | 'member' | 'viewer';
-
-interface OrganizationMember {
-  id: string;
-  organization_id: string;
-  user_id: string;
-  role: OrgMemberRole;
-  created_at: string;
-  updated_at: string;
-}
-
-interface ListOrgMembersResponse {
-  members: OrganizationMember[];
-}
 
 interface ProjectResponse {
   id: string;
@@ -35,22 +24,15 @@ interface ProjectResponse {
 
 /**
  * Maps organization member role to project role.
- * Owner/Admin -> project_owner (full access)
- * Moderator -> team_leader
- * Member -> developer
- * Viewer -> worker
+ * ADMIN -> project_owner (full access to all workbook features)
+ * MEMBER -> developer (basic access)
  */
-function mapOrgRoleToProjectRole(orgRole: OrgMemberRole): ProjectRole {
+function mapOrgRoleToProjectRole(orgRole: MemberRole): ProjectRole {
   switch (orgRole) {
-    case 'owner':
-    case 'admin':
+    case MemberRole.ADMIN:
       return 'project_owner';
-    case 'moderator':
-      return 'team_leader';
-    case 'member':
+    case MemberRole.MEMBER:
       return 'developer';
-    case 'viewer':
-      return 'worker';
     default:
       return 'developer';
   }
@@ -101,10 +83,12 @@ export function useProjectRole(projectId: string | undefined) {
           // If members endpoint fails, default to project_owner for authorized users
           return 'project_owner';
         }
-        const data = (await membersResponse.json()) as ListOrgMembersResponse;
+        const data = (await membersResponse.json()) as ListMembersResponse;
 
         // Find current user's membership
-        const membership = data.members.find((m) => m.user_id === userId);
+        const membership = data.members.find(
+          (m: OrganizationMemberWithProfile) => m.user_id === userId
+        );
         if (membership) {
           return mapOrgRoleToProjectRole(membership.role);
         }

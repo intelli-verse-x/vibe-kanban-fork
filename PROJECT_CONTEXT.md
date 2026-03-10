@@ -62,7 +62,13 @@
 | **mcp** | `crates/mcp/` | MCP Protocol | Model Context Protocol client |
 | **review** | `crates/review/` | Code review | PR review tool |
 | **deployment** | `crates/deployment/` | Deploy utils | Cloud deployment helpers |
+| **local-deployment** | `crates/local-deployment/` | Local deploy | Local deployment helpers |
 | **relay-tunnel** | `crates/relay-tunnel/` | Tunneling | Secure relay connections |
+| **relay-control** | `crates/relay-control/` | Relay control | Relay control plane for tunneling |
+| **server-info** | `crates/server-info/` | Server info | Server information and health |
+| **trusted-key-auth** | `crates/trusted-key-auth/` | Auth | Ed25519-based authentication |
+| **workspace-manager** | `crates/workspace-manager/` | Workspace mgmt | Workspace lifecycle management |
+| **worktree-manager** | `crates/worktree-manager/` | Worktree mgmt | Git worktree management |
 
 ### **Frontend (TypeScript/React)**
 
@@ -79,7 +85,7 @@
 | Path | Purpose | Generated From |
 |------|---------|----------------|
 | `shared/types.ts` | Local API types | `crates/server/src/bin/generate_types.rs` |
-| `shared/remote-types.ts` | Remote API types | `crates/remote/src/bin/remote-generate-types.rs` |
+| `shared/remote-types.ts` | Remote API types | `crates/remote/src/bin/generate_types.rs` |
 | `shared/schemas/` | Agent tool schemas | Auto-generated JSON schemas |
 
 ---
@@ -174,6 +180,16 @@
 │                  WORKBOOK PM FEATURES                        │
 ├──────────────────────────────────────────────────────────────┤
 │                                                              │
+│  📊 DASHBOARD                                                │
+│  ├── Feature count & status overview                         │
+│  ├── KPI count & health indicators                           │
+│  ├── Bug count (total/open)                                  │
+│  ├── Risk count (total/open)                                 │
+│  ├── Sprint status                                           │
+│  ├── Release count & timeline                                │
+│  ├── Feedback summary                                        │
+│  └── Time tracking summary                                   │
+│                                                              │
 │  🎯 FEATURES                                                 │
 │  ├── Feature tracking with keys (FT-XXXX)                    │
 │  ├── Status: backlog/in_progress/done/blocked                │
@@ -188,6 +204,11 @@
 │  ├── Unit of measurement                                     │
 │  ├── Frequency: daily/weekly/monthly/quarterly/yearly        │
 │  └── Status: on_track/at_risk/off_track/achieved             │
+│                                                              │
+│  🔗 KPI-FEATURE MATRIX                                       │
+│  ├── Map KPIs to Features visually                           │
+│  ├── Impact analysis                                         │
+│  └── Coverage tracking                                       │
 │                                                              │
 │  🐛 BUGS                                                     │
 │  ├── Bug tracking with keys (BUG-XXXX)                       │
@@ -222,7 +243,12 @@
 │  ├── Planned vs actual release dates                         │
 │  └── Release notes                                           │
 │                                                              │
-│  ⏱️ TIME ENTRIES                                             │
+│  📋 TASKS                                                    │
+│  ├── Task management within workbook                         │
+│  ├── Task-to-feature linking                                 │
+│  └── Status tracking                                         │
+│                                                              │
+│  ⏱️ TIME TRACKING                                            │
 │  ├── Time logging per issue/feature                          │
 │  ├── Duration in minutes                                     │
 │  ├── Billable tracking                                       │
@@ -236,15 +262,20 @@
 │  ├── Status: new/reviewing/planned/implemented               │
 │  └── Customer info tracking                                  │
 │                                                              │
-│  📈 DASHBOARD                                                │
-│  ├── Feature count                                           │
-│  ├── KPI count                                               │
-│  ├── Bug count (total/open)                                  │
-│  ├── Risk count (total/open)                                 │
-│  ├── Sprint status                                           │
-│  ├── Release count                                           │
-│  ├── Feedback count                                          │
-│  └── Time tracking summary                                   │
+│  📈 ANALYTICS                                                │
+│  ├── Project metrics visualization                           │
+│  ├── Trend analysis                                          │
+│  └── Performance insights                                    │
+│                                                              │
+│  🧪 A/B TESTS                                                │
+│  ├── Experiment tracking                                     │
+│  ├── Variant management                                      │
+│  └── Results analysis                                        │
+│                                                              │
+│  💰 MONETIZATION                                             │
+│  ├── Revenue tracking                                        │
+│  ├── Pricing experiments                                     │
+│  └── Conversion metrics                                      │
 │                                                              │
 └──────────────────────────────────────────────────────────────┘
 ```
