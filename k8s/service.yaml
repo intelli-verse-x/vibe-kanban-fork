@@ -3,10 +3,14 @@ kind: Service
 metadata:
   name: vibe-kanban-v1
   namespace: aicart
+  labels:
+    app: vibe-kanban-v1
 spec:
   selector:
     app: vibe-kanban-v1
   ports:
     - protocol: TCP
-      port: 3000
+      port: 80
       targetPort: 3000
+      name: http
+  type: ClusterIP
