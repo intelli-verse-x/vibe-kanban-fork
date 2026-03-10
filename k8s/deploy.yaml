@@ -26,6 +26,10 @@ spec:
               value: "0.0.0.0"
             - name: PORT
               value: "3000"
+            - name: VK_SHARED_API_BASE
+              value: "https://api.vibekanban.com"
+            - name: VK_ALLOWED_ORIGINS
+              value: "https://vk1.intelli-verse-x.ai"
           resources:
             requests:
               cpu: "500m"
