@@ -443,7 +443,7 @@ export function ProjectWorkbookBugs({ projectId }: ProjectWorkbookBugsProps) {
       status: (data.status as BugStatus | undefined) || ('reported' as BugStatus),
       assigned_to_user_id: (data.assigned_to_user_id as string) || undefined,
       related_feature_id: (data.related_feature_id as string) || undefined,
-      steps: (data.steps as string) || undefined,
+      steps_to_reproduce: (data.steps as string) || undefined,
       environment: (data.environment as string) || undefined,
     };
     await createBug.mutateAsync(bugData as never);
@@ -472,7 +472,7 @@ export function ProjectWorkbookBugs({ projectId }: ProjectWorkbookBugsProps) {
         data.related_feature_id !== undefined
           ? (data.related_feature_id as string | null) || null
           : undefined,
-      steps:
+      steps_to_reproduce:
         data.steps !== undefined ? (data.steps as string | null) : undefined,
       environment:
         data.environment !== undefined
