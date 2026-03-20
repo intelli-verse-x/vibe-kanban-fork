@@ -31,14 +31,14 @@ ENV VITE_VK_SHARED_API_BASE=$VK_SHARED_API_BASE
 WORKDIR /app
 
 # Copy package files first for dependency caching
-COPY package*.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package*.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 COPY packages/local-web/package*.json ./packages/local-web/
 COPY packages/web-core/package*.json ./packages/web-core/
 COPY packages/ui/package*.json ./packages/ui/
 COPY packages/remote-web/package*.json ./packages/remote-web/
 COPY npx-cli/package*.json ./npx-cli/
 
-RUN npm install -g pnpm && pnpm install
+RUN corepack enable && corepack install && pnpm install
 
 # Copy all source code
 COPY . .
@@ -80,8 +80,8 @@ EXPOSE 3000
 
 WORKDIR /repos
 
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-    CMD wget --quiet --tries=1 --spider "http://localhost:${PORT:-3000}" || exit 1
+HEALTHCHECK --interval=30s --timeout=3s --start-period=15s --retries=3 \
+    CMD wget --quiet --tries=1 --spider "http://localhost:${PORT:-3000}/healthz" || exit 1
 
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["server"]

@@ -41,8 +41,6 @@ phases:
       - echo "********** Post-build Phase **********"
       - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_DEFAULT_REGION --kubeconfig /root/.kube/config
       - export KUBECONFIG=/root/.kube/config
-      - echo "Applying K8s manifests (creates resources if missing, no-op if unchanged)..."
-      - kubectl apply -f k8s/
       - echo "Updating image to $REPOSITORY_URI:$IMAGE_TAG ..."
       - kubectl set image deployment/$K8S_DEPLOYMENT server=$REPOSITORY_URI:$IMAGE_TAG -n $K8S_NAMESPACE
       - kubectl rollout status deployment/$K8S_DEPLOYMENT -n $K8S_NAMESPACE --timeout=300s
