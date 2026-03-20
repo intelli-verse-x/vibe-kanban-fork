@@ -4,22 +4,17 @@ on:
   push:
     branches: [main]
     paths-ignore:
-      - "*.md"
+      - "**.md"
       - "docs/**"
-      - ".github/workflows/test.yml"
-      - ".github/workflows/remote-*"
-      - ".github/workflows/relay-*"
-      - ".github/workflows/publish.yml"
-      - ".github/workflows/pre-release.yml"
   workflow_dispatch:
 
 concurrency:
-  group: deploy-${{ github.ref }}
+  group: deploy-eks
   cancel-in-progress: false
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPOSITORY: vibe-kanban-v1
+  ECR_REPO: vibe-kanban-v1
   EKS_CLUSTER: ai-cart-auto-cluster
   K8S_NAMESPACE: aicart
   K8S_DEPLOYMENT: vibe-kanban-v1
@@ -27,12 +22,8 @@ env:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -42,60 +33,47 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
-        id: ecr-login
-        uses: aws-actions/amazon-ecr-login@v2
+        run: |
+          aws ecr get-login-password --region $AWS_REGION \
+            | docker login --username AWS --password-stdin \
+              970547373533.dkr.ecr.$AWS_REGION.amazonaws.com
 
-      - name: Login to Docker Hub
-        if: ${{ secrets.DOCKER_USERNAME != '' }}
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Extract image metadata
-        id: meta
-        env:
-          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+      - name: Set image tags
+        id: tags
         run: |
           IMAGE_TAG="${GITHUB_SHA::8}"
-          REPO_URI="${ECR_REGISTRY}/${ECR_REPOSITORY}"
+          REPO_URI="970547373533.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}"
           echo "image_tag=${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
           echo "repo_uri=${REPO_URI}" >> "$GITHUB_OUTPUT"
+          echo "Image: ${REPO_URI}:${IMAGE_TAG}"
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: |
-            ${{ steps.meta.outputs.repo_uri }}:${{ steps.meta.outputs.image_tag }}
-            ${{ steps.meta.outputs.repo_uri }}:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v4
-
-      - name: Update kubeconfig
+      - name: Build Docker image
         run: |
-          aws eks update-kubeconfig \
-            --name ${{ env.EKS_CLUSTER }} \
-            --region ${{ env.AWS_REGION }}
+          docker build \
+            -t ${{ steps.tags.outputs.repo_uri }}:${{ steps.tags.outputs.image_tag }} \
+            -t ${{ steps.tags.outputs.repo_uri }}:latest \
+            .
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ steps.tags.outputs.repo_uri }}:${{ steps.tags.outputs.image_tag }}
+          docker push ${{ steps.tags.outputs.repo_uri }}:latest
 
       - name: Deploy to EKS
         run: |
-          kubectl set image deployment/${{ env.K8S_DEPLOYMENT }} \
-            server=${{ steps.meta.outputs.repo_uri }}:${{ steps.meta.outputs.image_tag }} \
-            -n ${{ env.K8S_NAMESPACE }}
-          kubectl rollout status deployment/${{ env.K8S_DEPLOYMENT }} \
-            -n ${{ env.K8S_NAMESPACE }} \
-            --timeout=300s
+          aws eks update-kubeconfig --name $EKS_CLUSTER --region $AWS_REGION
+          kubectl set image deployment/$K8S_DEPLOYMENT \
+            server=${{ steps.tags.outputs.repo_uri }}:${{ steps.tags.outputs.image_tag }} \
+            -n $K8S_NAMESPACE
+          kubectl rollout status deployment/$K8S_DEPLOYMENT \
+            -n $K8S_NAMESPACE --timeout=300s
+          echo "Deployment completed successfully"
 
-      - name: Verify deployment health
+      - name: Verify pod health
         run: |
-          kubectl get pods -n ${{ env.K8S_NAMESPACE }} -l app=${{ env.K8S_DEPLOYMENT }}
-          POD=$(kubectl get pods -n ${{ env.K8S_NAMESPACE }} -l app=${{ env.K8S_DEPLOYMENT }} -o jsonpath='{.items[0].metadata.name}')
-          kubectl exec -n ${{ env.K8S_NAMESPACE }} "$POD" -- wget -qO- http://localhost:3000/healthz
+          kubectl get pods -n $K8S_NAMESPACE -l app=$K8S_DEPLOYMENT
+          POD=$(kubectl get pods -n $K8S_NAMESPACE -l app=$K8S_DEPLOYMENT \
+            -o jsonpath='{.items[0].metadata.name}')
+          HEALTH=$(kubectl exec -n $K8S_NAMESPACE "$POD" -- \
+            wget -qO- http://localhost:3000/healthz)
+          echo "Health check: $HEALTH"
