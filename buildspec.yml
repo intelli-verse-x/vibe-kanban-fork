@@ -1,6 +1,19 @@
 version: 0.2
 run-as: root
 
+# Multi-arch (amd64+arm64) via NATIVE runners — no QEMU anywhere.
+#
+# The previous buildspec used QEMU (`docker buildx --platform linux/amd64,linux/arm64`)
+# which times out for this Rust workspace (>180 min emulated). This pipeline instead:
+#   1. builds amd64 natively HERE (plain docker build) -> :<tag>-amd64
+#   2. triggers the sibling CodeBuild project `vibe-kanban-v1-arm64`
+#      (ARM_CONTAINER = real Graviton host, plain docker build, NO emulation)
+#      -> :<tag>-arm64, and waits with a HARD 60-min cap (native Rust compile)
+#   3. merges both into :<tag> + :latest with `docker buildx imagetools create`
+#      (pure manifest surgery, no build)
+#   4. if the arm64 leg fails or times out, it FALLS BACK to promoting the
+#      amd64-only image to :<tag> + :latest — the deploy is never blocked.
+
 env:
   variables:
     AWS_DEFAULT_REGION: us-east-1
@@ -26,18 +39,69 @@ phases:
       - echo "Image tag      = $IMAGE_TAG"
       - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin ${ECR_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
-      - docker run --privileged --rm tonistiigi/binfmt --install arm64 || true
-      - docker buildx create --use --name multiarch || docker buildx use multiarch
+      # Kick off the NATIVE arm64 sibling build early so it runs in parallel
+      # with the amd64 build below. Builds the same commit, pushes :<tag>-arm64.
+      - |
+        set -u
+        ARM64_SRC_VERSION="${CODEBUILD_RESOLVED_SOURCE_VERSION:-main}"
+        ARM64_BUILD_ID=$(aws codebuild start-build \
+          --project-name vibe-kanban-v1-arm64 \
+          --region $AWS_DEFAULT_REGION \
+          --source-version "$ARM64_SRC_VERSION" \
+          --environment-variables-override name=IMAGE_TAG,value=$IMAGE_TAG,type=PLAINTEXT \
+          --query 'build.id' --output text) || ARM64_BUILD_ID=""
+        echo "$ARM64_BUILD_ID" > /tmp/arm64_build_id
+        echo "arm64 sibling build: ${ARM64_BUILD_ID:-FAILED-TO-START} (commit $ARM64_SRC_VERSION)"
 
   build:
     commands:
-      - echo "********** Build Phase **********"
+      - echo "********** Build Phase (native amd64) **********"
       - echo "Build started on $(date)"
-      - docker buildx build --platform linux/amd64,linux/arm64 --provenance=false -t $REPOSITORY_URI:$IMAGE_TAG -t $REPOSITORY_URI:latest --push .
+      - rm -f /tmp/vibe_kanban_image_pushed
+      - |
+        set -eu
+        docker build -t $REPOSITORY_URI:$IMAGE_TAG-amd64 .
+        docker push $REPOSITORY_URI:$IMAGE_TAG-amd64
+        touch /tmp/vibe_kanban_image_pushed
+      # Wait for the arm64 leg (hard cap: 60 min for native Rust compile),
+      # then stitch the manifest list. Fallback = amd64-only promote.
+      - |
+        set -u
+        ARM64_BUILD_ID=$(cat /tmp/arm64_build_id 2>/dev/null || true)
+        ARM64_OK=no
+        if [ -n "$ARM64_BUILD_ID" ]; then
+          DEADLINE=$(( $(date +%s) + 3600 ))
+          while [ "$(date +%s)" -lt "$DEADLINE" ]; do
+            STATUS=$(aws codebuild batch-get-builds --ids "$ARM64_BUILD_ID" --region $AWS_DEFAULT_REGION \
+              --query 'builds[0].buildStatus' --output text 2>/dev/null || echo UNKNOWN)
+            case "$STATUS" in
+              SUCCEEDED) ARM64_OK=yes; break ;;
+              IN_PROGRESS|UNKNOWN) sleep 30 ;;
+              *) echo "arm64 build ended: $STATUS"; break ;;
+            esac
+          done
+        fi
+        if [ "$ARM64_OK" = yes ]; then
+          echo "Merging amd64+arm64 manifest -> :$IMAGE_TAG and :latest"
+          docker buildx imagetools create \
+            -t $REPOSITORY_URI:$IMAGE_TAG -t $REPOSITORY_URI:latest \
+            $REPOSITORY_URI:$IMAGE_TAG-amd64 $REPOSITORY_URI:$IMAGE_TAG-arm64
+        else
+          echo "WARN: arm64 leg unavailable — promoting amd64-only (deploy not blocked)"
+          docker buildx imagetools create \
+            -t $REPOSITORY_URI:$IMAGE_TAG -t $REPOSITORY_URI:latest \
+            $REPOSITORY_URI:$IMAGE_TAG-amd64
+        fi
+        docker buildx imagetools inspect $REPOSITORY_URI:$IMAGE_TAG
       - echo "Build completed on $(date)"
 
   post_build:
     commands:
+      - |
+        if [ ! -f /tmp/vibe_kanban_image_pushed ]; then
+          echo "Skipping Kubernetes deploy: image push did not complete in this run."
+          exit 1
+        fi
       - echo "********** Post-build Phase **********"
       - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_DEFAULT_REGION --kubeconfig /root/.kube/config
       - export KUBECONFIG=/root/.kube/config
