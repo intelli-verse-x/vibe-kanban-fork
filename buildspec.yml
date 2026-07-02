@@ -43,7 +43,10 @@ phases:
       # with the amd64 build below. Builds the same commit, pushes :<tag>-arm64.
       - |
         set -u
-        ARM64_SRC_VERSION="${CODEBUILD_RESOLVED_SOURCE_VERSION:-main}"
+        # NOTE: this repo's CodeConnection cannot fetch bare commit SHAs
+        # ("reference not found"), so the sibling builds branch tip `main`.
+        # The pipeline always builds main tip, so tag/commit stay consistent.
+        ARM64_SRC_VERSION="main"
         ARM64_BUILD_ID=$(aws codebuild start-build \
           --project-name vibe-kanban-v1-arm64 \
           --region $AWS_DEFAULT_REGION \
