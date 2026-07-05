@@ -1,0 +1,56 @@
+# CodeBuild -> GitHub Actions migration (2026-07-05).
+# Replaces: CodePipeline vibe-kanban-v1-pipeline + CodeBuild vibe-kanban-v1-build (+ arm64 sibling; Rust native arm64, no QEMU)
+# Rollback: re-enable the CodePipeline source trigger (DetectChanges=true).
+name: Build & Deploy to EKS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: 970547373533.dkr.ecr.us-east-1.amazonaws.com
+  EKS_CLUSTER: ai-cart-auto-cluster
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Docker Hub (rate limits)
+        continue-on-error: true
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & push image (native arm64)
+        run: |
+          set -euo pipefail
+          IMAGE_TAG="$(echo "$GITHUB_SHA" | cut -c1-8)"
+          REPOSITORY_URI="${ECR_REGISTRY}/vibe-kanban-v1"
+          docker build -t "$REPOSITORY_URI:$IMAGE_TAG" -t "$REPOSITORY_URI:latest" .
+          docker push "$REPOSITORY_URI:$IMAGE_TAG"
+          docker push "$REPOSITORY_URI:latest"
+          echo "IMAGE_TAG=$IMAGE_TAG" >> "$GITHUB_ENV"
+
+      - name: Deploy to EKS
+        run: |
+          set -euo pipefail
+          aws eks update-kubeconfig --name "$EKS_CLUSTER" --region "$AWS_REGION"
+          kubectl set image deployment/vibe-kanban-v1 server="${ECR_REGISTRY}/vibe-kanban-v1:${IMAGE_TAG}" -n aicart
+          kubectl rollout status deployment/vibe-kanban-v1 -n aicart --timeout=5m
