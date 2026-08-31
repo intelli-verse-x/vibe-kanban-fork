@@ -21,7 +21,6 @@ bindings/
 .env.production.local
 
 # IDE
-.vscode/
 .idea/
 *.swp
 *.swo
@@ -90,3 +89,4 @@ vibe-kanban-cloud/
 *.ts.net.key
 Caddyfile
 Caddyfile.dev
+config.bat
