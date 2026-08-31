@@ -1,0 +1,41 @@
+name: remote-eval guard
+
+# Calls the shared guard in intelli-verse-kube-infra. Written once there and
+# consumed here, so there is one copy to keep correct rather than one per repo.
+#
+# Why this repository needs it. It carried a live INC-2026-08-29 concealed
+# payload on `main` -- 507 spaces and 4,782 hidden bytes on line 261 of
+# scripts/setup-dev-environment.js -- and had no guard wiring at all, so nothing
+# would have reported it. An org-wide sweep of default-branch tips found three
+# live payloads and two of the three were in repositories with no wiring, which
+# is why the wiring is added here in the same change as the removal rather than
+# left to a later pass.
+#
+# Pinned at @main deliberately, as the other consumers are. The guard is a
+# single copy in kube-infra, so a rule correction reaches every consumer on its
+# next run with nothing to roll out; a consumer pinned at an older SHA keeps
+# running the older rules and its green means less than it appears to.
+#
+# This must be a required status check, not a hook. The carrier that delivered
+# this campaign passes --no-verify to both `git commit` and `git push`, so a
+# hook is not a control against it. Wiring instructions:
+# docs/security/REQUIRED-STATUS-CHECKS.md in intelli-verse-kube-infra.
+#
+# The check context this produces is `remote-eval-guard / guard`: the job below
+# is `remote-eval-guard` and the reusable workflow's job is `guard`. The bare
+# `guard` form is what a repository running the workflow natively produces, and
+# requiring the wrong one of the two creates a context that never appears and
+# blocks every pull request here.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  remote-eval-guard:
+    uses: intelli-verse-x/intelli-verse-kube-infra/.github/workflows/remote-eval-guard.yml@main
