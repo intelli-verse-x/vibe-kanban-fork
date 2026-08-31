@@ -14,12 +14,20 @@ concurrency:
 
 env:
   AWS_REGION: us-east-1
-  ECR_REGISTRY: 970547373533.dkr.ecr.us-east-1.amazonaws.com
+  # 803881282303 is the controlled production account. This was 970547373533
+  # (retired, reseller-managed) until INC-2026-08-29: images built here were
+  # pushed there and then cross-account-replicated into production, which is
+  # how vibe-kanban-v1:latest came to resolve to a foreign-account image.
+  ECR_REGISTRY: 803881282303.dkr.ecr.us-east-1.amazonaws.com
+  DEPLOY_ROLE: arn:aws:iam::803881282303:role/github-actions-vibe-kanban-fork-deploy
   EKS_CLUSTER: ai-cart-auto-cluster
 
 jobs:
   build-deploy:
     runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: read
+      id-token: write
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
@@ -27,8 +35,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ env.DEPLOY_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Docker Hub (rate limits)
@@ -46,13 +53,21 @@ jobs:
           docker build -t "$REPOSITORY_URI:$IMAGE_TAG" -t "$REPOSITORY_URI:latest" .
           docker push "$REPOSITORY_URI:$IMAGE_TAG"
           docker push "$REPOSITORY_URI:latest"
+          IMAGE_DIGEST="$(aws ecr describe-images --repository-name vibe-kanban-v1 \
+            --image-ids "imageTag=${IMAGE_TAG}" --region "$AWS_REGION" \
+            --query 'imageDetails[0].imageDigest' --output text)"
           echo "IMAGE_TAG=$IMAGE_TAG" >> "$GITHUB_ENV"
+          echo "IMAGE_DIGEST=$IMAGE_DIGEST" >> "$GITHUB_ENV"
 
       - name: Deploy to EKS
         run: |
           set -euo pipefail
           aws eks update-kubeconfig --name "$EKS_CLUSTER" --region "$AWS_REGION"
-          kubectl set image deployment/vibe-kanban-v1 server="${ECR_REGISTRY}/vibe-kanban-v1:${IMAGE_TAG}" -n aicart
+          # Deploy by immutable digest, not by the mutable tag. INC-2026-08-29:
+          # a foreign account could move `latest` on this repository, so a
+          # tag-based rollout could pull an image this build never produced.
+          kubectl set image deployment/vibe-kanban-v1 \
+            server="${ECR_REGISTRY}/vibe-kanban-v1@${IMAGE_DIGEST}" -n aicart
           kubectl rollout status deployment/vibe-kanban-v1 -n aicart --timeout=5m
 
   # ── Post-deploy smoke test (added 2026-07-10) ─────────────────────────────
@@ -63,6 +78,9 @@ jobs:
   smoke-test:
     needs: build-deploy
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     timeout-minutes: 15
     env:
       AWS_REGION: us-east-1
@@ -73,8 +91,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: arn:aws:iam::803881282303:role/github-actions-vibe-kanban-fork-deploy
           aws-region: us-east-1
 
       - name: Connect to EKS
