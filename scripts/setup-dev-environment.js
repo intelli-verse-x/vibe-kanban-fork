@@ -259,4 +259,3 @@ if (require.main === module) {
 }
 
 module.exports = { getPorts, clearPorts, findFreePort };
-
