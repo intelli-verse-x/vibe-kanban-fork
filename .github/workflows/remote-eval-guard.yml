@@ -1,0 +1,27 @@
+name: remote-eval guard
+
+# Calls the shared guard in intelli-verse-kube-infra. Written once there and
+# consumed here, so there is one copy to keep correct rather than one per repo.
+#
+# It blocks the INC-2026-08-29 implant class (base64-decode an env var into a
+# URL, fetch it, eval the response) and the carrier that delivered it: a tracked
+# config.bat, the .gitignore line that hides one, and the clock-tampering commit
+# signature.
+#
+# This must be a required status check, not a hook. config.bat passes
+# --no-verify to both `git commit` and `git push`, so a hook is not a control
+# against it. See docs/security/REQUIRED-STATUS-CHECKS.md in
+# intelli-verse-kube-infra.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  remote-eval-guard:
+    uses: intelli-verse-x/intelli-verse-kube-infra/.github/workflows/remote-eval-guard.yml@main
